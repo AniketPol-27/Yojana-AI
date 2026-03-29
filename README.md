@@ -73,7 +73,7 @@ flowchart LR
 | **Backend** | FastAPI, Python, Pandas |
 | **Frontend** | HTML5, CSS3, JavaScript |
 | **Deployment** | Databricks Apps |
-| **Data Source** | MyScheme Government of India API |
+| **Data Source** | MyScheme Government of India Website |
 
 ---
 
