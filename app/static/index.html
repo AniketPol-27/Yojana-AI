@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yojana AI - Government Scheme Finder</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+.hero{background:linear-gradient(135deg,#4a00e0,#8e2de2,#00b4d8);color:#fff;padding:24px;text-align:center}
+.hero h1{font-size:2.2em;margin-bottom:6px;text-shadow:0 2px 4px rgba(0,0,0,0.2)}
+.hero p{opacity:0.92;font-size:1.05em;margin-bottom:10px}
+.badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:20px;font-size:0.82em;backdrop-filter:blur(4px)}
+.container{max-width:960px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.08);padding:20px;margin-bottom:16px}
+.tabs{display:flex;gap:0;margin-bottom:16px}
+.tab{flex:1;padding:12px;text-align:center;cursor:pointer;border:2px solid #e0e0e0;background:#f9f9f9;font-weight:600;transition:all 0.2s}
+.tab:first-child{border-radius:10px 0 0 10px}
+.tab:last-child{border-radius:0 10px 10px 0}
+.tab.active{background:#4a00e0;color:#fff;border-color:#4a00e0}
+.tab-content{display:none}
+.tab-content.active{display:block}
+textarea{width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:10px;font-size:1em;min-height:100px;resize:vertical;font-family:inherit;transition:border 0.2s}
+textarea:focus{outline:none;border-color:#4a00e0}
+.row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.row select,.row input{flex:1;min-width:120px;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:0.95em}
+.btn{padding:12px 28px;border:none;border-radius:10px;font-size:1.05em;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:linear-gradient(135deg,#4a00e0,#8e2de2);color:#fff;width:100%;justify-content:center;margin-top:14px}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(74,0,224,0.3)}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.examples{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.example-chip{background:#f0e6ff;color:#4a00e0;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:0.85em;border:1px solid #d4b5ff;transition:all 0.2s}
+.example-chip:hover{background:#4a00e0;color:#fff}
+.mic-area{text-align:center;padding:30px}
+.mic-btn{width:80px;height:80px;border-radius:50%;border:none;font-size:2em;cursor:pointer;transition:all 0.2s;background:#f0e6ff;color:#4a00e0}
+.mic-btn.recording{background:#e0245e;color:#fff;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(224,36,94,0.4)}70%{box-shadow:0 0 0 20px rgba(224,36,94,0)}}
+.mic-status{margin-top:10px;font-size:0.95em;color:#666}
+.results-section{display:none}
+.steps-bar{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+.step-item{flex:1;min-width:80px;text-align:center;padding:8px 4px;border-radius:8px;font-size:0.75em;font-weight:600}
+.step-item.done{background:#d4edda;color:#155724}
+.step-item.running{background:#fff3cd;color:#856404}
+.step-item.skipped{background:#f0f0f0;color:#666}
+.stats-bar{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.stat-box{flex:1;min-width:120px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:14px;border-radius:10px;text-align:center}
+.stat-box .stat-num{font-size:1.6em;font-weight:700}
+.stat-box .stat-label{font-size:0.8em;opacity:0.9}
+.profile-card{background:#f8f9fa;border-radius:10px;padding:14px;margin-bottom:14px}
+.profile-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.profile-tag{background:#e8e0ff;color:#4a00e0;padding:4px 10px;border-radius:6px;font-size:0.82em;font-weight:500}
+.scheme-card{border:2px solid #e8e0ff;border-radius:12px;padding:16px;margin-bottom:14px;transition:all 0.2s;position:relative}
+.scheme-card:hover{border-color:#4a00e0;box-shadow:0 4px 16px rgba(74,0,224,0.1)}
+.scheme-rank{position:absolute;top:-10px;left:14px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9em;color:#fff}
+.rank-1{background:linear-gradient(135deg,#f7971e,#ffd200)}
+.rank-2{background:linear-gradient(135deg,#bdc3c7,#a0a0a0)}
+.rank-3{background:linear-gradient(135deg,#cd7f32,#e8a87c)}
+.rank-other{background:#4a00e0}
+.scheme-name{font-size:1.1em;font-weight:700;color:#1a1a2e;margin-bottom:4px;padding-left:28px;padding-right:100px}
+.scheme-name-regional{font-size:0.95em;color:#4a00e0;margin-bottom:6px;padding-left:28px;font-style:italic}
+.scheme-ministry{font-size:0.85em;color:#666;margin-bottom:8px;padding-left:28px}
+.scheme-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.meta-badge{padding:4px 10px;border-radius:6px;font-size:0.78em;font-weight:600}
+.meta-benefit{background:#d4edda;color:#155724}
+.meta-score{background:#fff3cd;color:#856404}
+.meta-category{background:#e8e0ff;color:#4a00e0}
+.scheme-desc{font-size:0.92em;color:#444;line-height:1.5;margin-bottom:8px}
+.scheme-desc-regional{font-size:0.88em;color:#4a00e0;line-height:1.5;margin-bottom:8px;font-style:italic;display:none}
+.scheme-desc-regional.show{display:block}
+.expand-section{border-top:1px solid #eee;margin-top:8px}
+.expand-header{display:flex;align-items:center;justify-content:space-between;padding:10px 0;cursor:pointer;font-weight:600;font-size:0.92em;color:#333}
+.expand-header:hover{color:#4a00e0}
+.expand-arrow{transition:transform 0.2s;font-size:0.8em}
+.expand-arrow.open{transform:rotate(180deg)}
+.expand-body{display:none;padding:0 0 10px 0;font-size:0.88em;color:#555;line-height:1.6}
+.expand-body.open{display:block}
+.action-btns{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.btn-sm{padding:5px 12px;border:1px solid #d4b5ff;border-radius:6px;background:#f8f4ff;color:#4a00e0;font-size:0.78em;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:4px}
+.btn-sm:hover{background:#4a00e0;color:#fff;border-color:#4a00e0}
+.btn-sm:disabled{opacity:0.5;cursor:wait}
+.translated-text{margin-top:6px;padding:8px;background:#f0e6ff;border-radius:6px;font-size:0.88em;color:#4a00e0;font-style:italic;display:none}
+.translated-text.show{display:block}
+.inline-audio{margin-top:6px;display:none}
+.inline-audio.show{display:block}
+.inline-audio audio{width:100%;height:36px;border-radius:8px}
+.scheme-listen-btn{position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#4a00e0,#8e2de2);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:0.82em;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-weight:600;transition:all 0.2s}
+.scheme-listen-btn:hover{transform:scale(1.05);box-shadow:0 2px 8px rgba(74,0,224,0.3)}
+.scheme-listen-btn:disabled{opacity:0.5;cursor:wait}
+.audio-card{background:linear-gradient(135deg,#667eea,#764ba2);border-radius:12px;padding:16px;color:#fff;margin-bottom:14px}
+.audio-card audio{width:100%;margin-top:8px;border-radius:8px}
+.summary-card{background:#f0e6ff;border-radius:12px;padding:16px;margin-bottom:14px}
+.summary-card .regional-text{font-size:1.05em;line-height:1.6;color:#4a00e0}
+.loading-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;flex-direction:column}
+.loading-overlay.show{display:flex}
+.spinner{width:50px;height:50px;border:4px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:#fff;margin-top:16px;font-size:1.1em;text-align:center}
+.toast{position:fixed;bottom:20px;right:20px;background:#e0245e;color:#fff;padding:12px 20px;border-radius:10px;z-index:1001;display:none;max-width:350px;font-size:0.9em;box-shadow:0 4px 15px rgba(0,0,0,0.2)}
+.toast.show{display:block}
+@media(max-width:600px){
+    .hero h1{font-size:1.5em}
+    .row{flex-direction:column}
+    .stats-bar{flex-direction:column}
+    .scheme-listen-btn{position:static;margin-top:8px;margin-bottom:8px}
+    .scheme-name{padding-right:10px}
+}
+</style>
+</head>
+<body>
+<div class="hero">
+    <h1>&#x1F1EE;&#x1F1F3; Yojana AI</h1>
+    <p>AI-Powered Government Scheme Finder for Every Indian</p>
+    <div class="badges">
+        <span class="badge">&#x1F916; Sarvam AI</span>
+        <span class="badge">&#x26A1; Databricks</span>
+        <span class="badge">&#x1F4CA; MLflow</span>
+        <span class="badge">&#x1F310; 11 Languages</span>
+        <span class="badge">&#x1F50A; Voice I/O</span>
+    </div>
+</div>
+<div class="container">
+    <div class="card">
+        <div class="tabs">
+            <div class="tab active" id="tabText">&#x270D;&#xFE0F; Text Input</div>
+            <div class="tab" id="tabVoice">&#x1F399;&#xFE0F; Voice Input</div>
+        </div>
+        <div class="tab-content active" id="contentText">
+            <textarea id="userInput" placeholder="Describe yourself: age, occupation, state, income, caste, gender...&#10;Example: I am a 25 year old farmer from UP with 2 lakh income, OBC category, rural area"></textarea>
+            <div class="row">
+                <select id="inputLang">
+                    <option value="english">English</option>
+                    <option value="hindi">Hindi</option>
+                    <option value="tamil">Tamil</option>
+                    <option value="telugu">Telugu</option>
+                    <option value="bengali">Bengali</option>
+                    <option value="marathi">Marathi</option>
+                    <option value="gujarati">Gujarati</option>
+                    <option value="kannada">Kannada</option>
+                    <option value="malayalam">Malayalam</option>
+                    <option value="punjabi">Punjabi</option>
+                    <option value="odia">Odia</option>
+                </select>
+                <select id="outputLang">
+                    <option value="auto">Auto-detect Output</option>
+                    <option value="english">English</option>
+                    <option value="hindi">Hindi</option>
+                    <option value="tamil">Tamil</option>
+                    <option value="telugu">Telugu</option>
+                    <option value="bengali">Bengali</option>
+                    <option value="marathi">Marathi</option>
+                    <option value="gujarati">Gujarati</option>
+                    <option value="kannada">Kannada</option>
+                    <option value="malayalam">Malayalam</option>
+                    <option value="punjabi">Punjabi</option>
+                    <option value="odia">Odia</option>
+                </select>
+                <select id="maxSchemes">
+                    <option value="5">Top 5</option>
+                    <option value="8">Top 8</option>
+                    <option value="10" selected>Top 10</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" id="btnFind">&#x1F50D; Find My Schemes</button>
+            <div class="examples" id="examplesDiv"></div>
+        </div>
+        <div class="tab-content" id="contentVoice">
+            <div class="mic-area">
+                <button class="mic-btn" id="micBtn">&#x1F399;&#xFE0F;</button>
+                <p class="mic-status" id="micStatus">Tap to start recording</p>
+                <audio id="playback" controls style="display:none;margin:12px auto;width:80%"></audio>
+                <div class="row" style="justify-content:center;margin-top:12px">
+                    <select id="voiceLang">
+                        <option value="hindi">Hindi</option><option value="tamil">Tamil</option>
+                        <option value="telugu">Telugu</option><option value="bengali">Bengali</option>
+                        <option value="marathi">Marathi</option><option value="gujarati">Gujarati</option>
+                        <option value="kannada">Kannada</option><option value="malayalam">Malayalam</option>
+                        <option value="punjabi">Punjabi</option><option value="odia">Odia</option>
+                        <option value="english">English</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="btnVoiceSubmit" style="max-width:300px;margin:14px auto" disabled>&#x1F50D; Process Voice Input</button>
+            </div>
+        </div>
+    </div>
+    <div class="results-section" id="resultsSection"></div>
+</div>
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Processing your profile...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var currentResult = null;
+var ttsCache = {};
+var translationCache = {};
+
+var examples = [
+    {label:"\ud83c\udf3e Hindi Farmer", text:"\u092e\u0948\u0902 35 \u0938\u093e\u0932 \u0915\u093e \u0915\u093f\u0938\u093e\u0928 \u0939\u0942\u0902 \u0909\u0924\u094d\u0924\u0930 \u092a\u094d\u0930\u0926\u0947\u0936 \u0938\u0947, OBC \u0936\u094d\u0930\u0947\u0923\u0940, \u0917\u094d\u0930\u093e\u092e\u0940\u0923 \u0915\u094d\u0937\u0947\u0924\u094d\u0930, \u0906\u092f 2 \u0932\u093e\u0916", lang:"hindi"},
+    {label:"\ud83d\udcda Tamil Student", text:"\u0ba8\u0bbe\u0ba9\u0bcd 20 \u0bb5\u0baf\u0ba4\u0bc1 \u0baa\u0bc6\u0ba3\u0bcd \u0bae\u0bbe\u0ba3\u0bb5\u0bbf, \u0ba4\u0bae\u0bbf\u0bb4\u0bcd\u0ba8\u0bbe\u0b9f\u0bc1, SC \u0baa\u0bbf\u0bb0\u0bbf\u0bb5\u0bc1, \u0b95\u0bbf\u0bb0\u0bbe\u0bae\u0baa\u0bcd\u0baa\u0bc1\u0bb1\u0bae\u0bcd, \u0bb5\u0bb0\u0bc1\u0bae\u0bbe\u0ba9\u0bae\u0bcd 1 \u0bb2\u0b9f\u0bcd\u0b9a\u0bae\u0bcd", lang:"tamil"},
+    {label:"\ud83d\udc69 Telugu Woman", text:"\u0c28\u0c47\u0c28\u0c41 30 \u0c38\u0c02\u0c35\u0c24\u0c4d\u0c38\u0c30\u0c3e\u0c32 \u0c2e\u0c39\u0c3f\u0c33\u0c28\u0c41, \u0c06\u0c02\u0c27\u0c4d\u0c30\u0c2a\u0c4d\u0c30\u0c26\u0c47\u0c36\u0c4d, OBC, \u0c17\u0c4d\u0c30\u0c3e\u0c2e\u0c40\u0c23, \u0c06\u0c26\u0c3e\u0c2f\u0c02 1.5 \u0c32\u0c15\u0c4d\u0c37\u0c32\u0c41", lang:"telugu"},
+    {label:"\ud83d\udee0 Marathi Worker", text:"\u092e\u0940 40 \u0935\u0930\u094d\u0937\u093e\u091a\u093e \u0915\u093e\u092e\u0917\u093e\u0930 \u0906\u0939\u0947, \u092e\u0939\u093e\u0930\u093e\u0937\u094d\u091f\u094d\u0930, OBC, \u0936\u0939\u0930\u0940, \u0909\u0924\u094d\u092a\u0928\u094d\u0928 3 \u0932\u093e\u0916", lang:"marathi"},
+    {label:"\ud83c\udf93 Bengali Student", text:"\u0986\u09ae\u09bf 19 \u09ac\u099b\u09b0\u09c7\u09b0 \u099b\u09be\u09a4\u09cd\u09b0, \u09aa\u09b6\u09cd\u099a\u09bf\u09ae\u09ac\u0999\u09cd\u0997, SC, \u0997\u09cd\u09b0\u09be\u09ae\u09c0\u09a3, \u0986\u09af\u09bc 1 \u09b2\u0995\u09cd\u09b7", lang:"bengali"},
+    {label:"\ud83d\udc74 English Senior", text:"I am a 68 year old retired man from Delhi, general category, urban area, pension income 3 lakh per year", lang:"english"}
+];
+
+function showLoading(msg){
+    document.getElementById("loadingText").textContent = msg || "Processing...";
+    document.getElementById("loadingOverlay").classList.add("show");
+}
+function hideLoading(){document.getElementById("loadingOverlay").classList.remove("show");}
+function showToast(msg){
+    var t=document.getElementById("toast");
+    t.textContent=msg; t.classList.add("show");
+    setTimeout(function(){t.classList.remove("show");},4000);
+}
+
+// Init
+(function(){
+    document.getElementById("tabText").addEventListener("click",function(){
+        this.classList.add("active");
+        document.getElementById("tabVoice").classList.remove("active");
+        document.getElementById("contentText").classList.add("active");
+        document.getElementById("contentVoice").classList.remove("active");
+    });
+    document.getElementById("tabVoice").addEventListener("click",function(){
+        this.classList.add("active");
+        document.getElementById("tabText").classList.remove("active");
+        document.getElementById("contentVoice").classList.add("active");
+        document.getElementById("contentText").classList.remove("active");
+    });
+    var exDiv=document.getElementById("examplesDiv");
+    for(var i=0;i<examples.length;i++){
+        (function(ex){
+            var c=document.createElement("span");
+            c.className="example-chip";c.textContent=ex.label;
+            c.addEventListener("click",function(){
+                document.getElementById("userInput").value=ex.text;
+                document.getElementById("inputLang").value=ex.lang;
+            });
+            exDiv.appendChild(c);
+        })(examples[i]);
+    }
+    document.getElementById("btnFind").addEventListener("click",handleTextSubmit);
+    setupVoice();
+})();
+
+function handleTextSubmit(){
+    var text=document.getElementById("userInput").value.trim();
+    if(!text){showToast("Please enter your profile");return;}
+    showLoading("Analyzing your profile...");
+    var xhr=new XMLHttpRequest();
+    xhr.open("POST","/api/process_text",true);
+    xhr.setRequestHeader("Content-Type","application/json");
+    xhr.onload=function(){
+        hideLoading();
+        if(xhr.status===200){currentResult=JSON.parse(xhr.responseText);renderResults(currentResult);}
+        else{showToast("Error: "+xhr.responseText);}
+    };
+    xhr.onerror=function(){hideLoading();showToast("Network error");};
+    xhr.send(JSON.stringify({
+        text:text,
+        input_language:document.getElementById("inputLang").value,
+        output_language:document.getElementById("outputLang").value,
+        max_schemes:parseInt(document.getElementById("maxSchemes").value)
+    }));
+}
+
+function setupVoice(){
+    var micBtn=document.getElementById("micBtn");
+    var micStatus=document.getElementById("micStatus");
+    var playback=document.getElementById("playback");
+    var btnSubmit=document.getElementById("btnVoiceSubmit");
+    var recording=false,mediaRec=null,audioChunks=[],audioBlob=null;
+
+    micBtn.addEventListener("click",function(){
+        if(!recording){
+            navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+                mediaRec=new MediaRecorder(stream);
+                audioChunks=[];
+                mediaRec.ondataavailable=function(e){audioChunks.push(e.data);};
+                mediaRec.onstop=function(){
+                    audioBlob=new Blob(audioChunks,{type:"audio/wav"});
+                    playback.src=URL.createObjectURL(audioBlob);
+                    playback.style.display="block";
+                    btnSubmit.disabled=false;
+                    stream.getTracks().forEach(function(t){t.stop();});
+                };
+                mediaRec.start();recording=true;
+                micBtn.classList.add("recording");
+                micBtn.innerHTML="&#x23F9;&#xFE0F;";
+                micStatus.textContent="Recording... tap to stop";
+            }).catch(function(){showToast("Microphone access denied");});
+        }else{
+            mediaRec.stop();recording=false;
+            micBtn.classList.remove("recording");
+            micBtn.innerHTML="&#x1F399;&#xFE0F;";
+            micStatus.textContent="Recording saved. Submit or re-record.";
+        }
+    });
+
+    btnSubmit.addEventListener("click",function(){
+        if(!audioBlob){showToast("Record audio first");return;}
+        showLoading("Transcribing and processing...");
+        var fd=new FormData();
+        fd.append("audio",audioBlob,"recording.wav");
+        fd.append("language",document.getElementById("voiceLang").value);
+        fd.append("max_schemes",10);
+        var xhr=new XMLHttpRequest();
+        xhr.open("POST","/api/process_audio",true);
+        xhr.onload=function(){
+            hideLoading();
+            if(xhr.status===200){currentResult=JSON.parse(xhr.responseText);renderResults(currentResult);}
+            else{showToast("Error: "+xhr.responseText);}
+        };
+        xhr.onerror=function(){hideLoading();showToast("Network error");};
+        xhr.send(fd);
+    });
+}
+
+// ── TTS for any section ──
+function requestTTS(text, language, sourceLanguage, callback){
+    var cacheKey = text.substring(0,80) + "|" + language;
+    if(ttsCache[cacheKey]){callback(ttsCache[cacheKey].audio, ttsCache[cacheKey].translatedText);return;}
+    var xhr=new XMLHttpRequest();
+    xhr.open("POST","/api/tts",true);
+    xhr.setRequestHeader("Content-Type","application/json");
+    xhr.onload=function(){
+        if(xhr.status===200){
+            var res=JSON.parse(xhr.responseText);
+            ttsCache[cacheKey]={audio:res.audio, translatedText:res.translated_text||""};
+            callback(res.audio, res.translated_text||"");
+        }else{callback(null,null);}
+    };
+    xhr.onerror=function(){callback(null,null);};
+    xhr.send(JSON.stringify({text:text, language:language, source_language:sourceLanguage||"english"}));
+}
+
+// ── Translate helper ──
+function requestTranslation(text, targetLang, sourceLang, callback){
+    var cacheKey = text.substring(0,80) + "|" + targetLang;
+    if(translationCache[cacheKey]){callback(translationCache[cacheKey]);return;}
+    var xhr=new XMLHttpRequest();
+    xhr.open("POST","/api/translate",true);
+    xhr.setRequestHeader("Content-Type","application/json");
+    xhr.onload=function(){
+        if(xhr.status===200){
+            var res=JSON.parse(xhr.responseText);
+            translationCache[cacheKey]=res.translated_text||"";
+            callback(res.translated_text||"");
+        }else{callback("");}
+    };
+    xhr.onerror=function(){callback("");};
+    xhr.send(JSON.stringify({text:text, target_language:targetLang, source_language:sourceLang||"english"}));
+}
+
+function esc(s){
+    if(!s)return "";
+    var d=document.createElement("div");d.textContent=s;return d.innerHTML;
+}
+
+function formatBenefit(v){
+    var n=parseFloat(v);
+    if(isNaN(n)||n<=0)return "Varies";
+    if(n>=100000)return "\u20B9"+(n/100000).toFixed(1)+"L";
+    if(n>=1000)return "\u20B9"+(n/1000).toFixed(0)+"K";
+    return "\u20B9"+n;
+}
+
+function renderResults(data){
+    var sec=document.getElementById("resultsSection");
+    sec.style.display="block";
+    sec.innerHTML="";
+    ttsCache={};translationCache={};
+    var outLang=data.output_language||"english";
+    var isRegional=(outLang!=="english");
+    var h="";
+
+    // Steps bar
+    h+='<div class="steps-bar">';
+    if(data.steps){for(var i=0;i<data.steps.length;i++){
+        var s=data.steps[i];
+        h+='<div class="step-item '+esc(s.status)+'">'+esc(s.step)+'</div>';
+    }}
+    h+='</div>';
+
+    // Summary audio
+    if(data.audio_b64){
+        h+='<div class="audio-card">';
+        h+='<strong>&#x1F50A; Voice Summary ('+esc(outLang)+')</strong>';
+        h+='<audio controls autoplay src="data:audio/wav;base64,'+data.audio_b64+'"></audio>';
+        h+='</div>';
+    }
+
+    // Profile card
+    if(data.profile){
+        var p=data.profile;
+        h+='<div class="profile-card"><strong>&#x1F464; Detected Profile</strong><div class="profile-tags">';
+        if(p.age)h+='<span class="profile-tag">Age: '+p.age+'</span>';
+        if(p.gender)h+='<span class="profile-tag">Gender: '+esc(p.gender)+'</span>';
+        if(p.occupation)h+='<span class="profile-tag">Occupation: '+esc(p.occupation)+'</span>';
+        if(p.income_lpa)h+='<span class="profile-tag">Income: '+p.income_lpa+' LPA</span>';
+        if(p.caste)h+='<span class="profile-tag">Category: '+esc(p.caste.toUpperCase())+'</span>';
+        if(p.area)h+='<span class="profile-tag">Area: '+esc(p.area)+'</span>';
+        if(p.state)h+='<span class="profile-tag">State: '+esc(p.state)+'</span>';
+        h+='</div></div>';
+    }
+
+    // Stats
+    h+='<div class="stats-bar">';
+    h+='<div class="stat-box"><div class="stat-num">'+data.num_schemes+'</div><div class="stat-label">Schemes Found</div></div>';
+    h+='<div class="stat-box"><div class="stat-num">'+formatBenefit(data.total_benefit)+'</div><div class="stat-label">Total Benefits</div></div>';
+    h+='<div class="stat-box"><div class="stat-num">'+(data.elapsed_seconds||0)+'s</div><div class="stat-label">Processing Time</div></div>';
+    h+='</div>';
+
+    // Scheme cards
+    var schemes=data.schemes||[];
+    for(var i=0;i<schemes.length;i++){
+        var sc=schemes[i];
+        var rankClass=sc.rank<=3?"rank-"+sc.rank:"rank-other";
+        var sid="s"+i;
+
+        h+='<div class="scheme-card">';
+        h+='<div class="scheme-rank '+rankClass+'">'+sc.rank+'</div>';
+
+        // Listen button (top right) - reads scheme summary
+        h+='<button class="scheme-listen-btn" id="'+sid+'lb" data-idx="'+i+'">&#x1F50A; Listen</button>';
+
+        h+='<div class="scheme-name" id="'+sid+'name">'+esc(sc.name)+'</div>';
+        // Regional name placeholder
+        h+='<div class="scheme-name-regional" id="'+sid+'nameR"></div>';
+        h+='<div class="scheme-ministry">'+esc(sc.ministry)+'</div>';
+        h+='<div class="scheme-meta">';
+        h+='<span class="meta-badge meta-benefit">'+formatBenefit(sc.benefit)+'</span>';
+        h+='<span class="meta-badge meta-score">Score: '+sc.score+'</span>';
+        if(sc.category)h+='<span class="meta-badge meta-category">'+esc(sc.category)+'</span>';
+        h+='</div>';
+
+        // Description
+        h+='<div class="scheme-desc" id="'+sid+'desc">'+esc(sc.description)+'</div>';
+        h+='<div class="scheme-desc-regional" id="'+sid+'descR"></div>';
+
+        // Per-scheme audio player (hidden until listen clicked)
+        h+='<div class="inline-audio" id="'+sid+'audio"><audio controls style="width:100%;height:36px;border-radius:8px" id="'+sid+'audioEl"></audio></div>';
+
+        // Expandable: How to Apply
+        if(sc.how_to_apply && sc.how_to_apply.length>5){
+            h+='<div class="expand-section">';
+            h+='<div class="expand-header" data-target="'+sid+'apply">&#x1F4DD; How to Apply <span class="expand-arrow" id="'+sid+'applyArr">&#x25BC;</span></div>';
+            h+='<div class="expand-body" id="'+sid+'apply">'+esc(sc.how_to_apply)+'';
+            h+='<div class="action-btns">';
+            h+='<button class="btn-sm btn-translate" data-text="'+sid+'apply" data-lang="'+outLang+'" data-src="english">&#x1F310; Translate</button>';
+            h+='<button class="btn-sm btn-listen" data-text="'+sid+'apply" data-lang="'+outLang+'" data-src="english">&#x1F50A; Listen</button>';
+            h+='</div>';
+            h+='<div class="translated-text" id="'+sid+'applyT"></div>';
+            h+='<div class="inline-audio" id="'+sid+'applyA"><audio controls style="width:100%;height:36px;border-radius:8px" id="'+sid+'applyAEl"></audio></div>';
+            h+='</div></div>';
+        }
+
+        // Expandable: Eligibility
+        if(sc.eligibility && sc.eligibility.length>5){
+            h+='<div class="expand-section">';
+            h+='<div class="expand-header" data-target="'+sid+'elig">&#x2705; Eligibility <span class="expand-arrow" id="'+sid+'eligArr">&#x25BC;</span></div>';
+            h+='<div class="expand-body" id="'+sid+'elig">'+esc(sc.eligibility)+'';
+            h+='<div class="action-btns">';
+            h+='<button class="btn-sm btn-translate" data-text="'+sid+'elig" data-lang="'+outLang+'" data-src="english">&#x1F310; Translate</button>';
+            h+='<button class="btn-sm btn-listen" data-text="'+sid+'elig" data-lang="'+outLang+'" data-src="english">&#x1F50A; Listen</button>';
+            h+='</div>';
+            h+='<div class="translated-text" id="'+sid+'eligT"></div>';
+            h+='<div class="inline-audio" id="'+sid+'eligA"><audio controls style="width:100%;height:36px;border-radius:8px" id="'+sid+'eligAEl"></audio></div>';
+            h+='</div></div>';
+        }
+
+        // Expandable: Benefits
+        if(sc.benefits_text && sc.benefits_text.length>5){
+            h+='<div class="expand-section">';
+            h+='<div class="expand-header" data-target="'+sid+'bene">&#x1F4B0; Benefits <span class="expand-arrow" id="'+sid+'beneArr">&#x25BC;</span></div>';
+            h+='<div class="expand-body" id="'+sid+'bene">'+esc(sc.benefits_text)+'';
+            h+='<div class="action-btns">';
+            h+='<button class="btn-sm btn-translate" data-text="'+sid+'bene" data-lang="'+outLang+'" data-src="english">&#x1F310; Translate</button>';
+            h+='<button class="btn-sm btn-listen" data-text="'+sid+'bene" data-lang="'+outLang+'" data-src="english">&#x1F50A; Listen</button>';
+            h+='</div>';
+            h+='<div class="translated-text" id="'+sid+'beneT"></div>';
+            h+='<div class="inline-audio" id="'+sid+'beneA"><audio controls style="width:100%;height:36px;border-radius:8px" id="'+sid+'beneAEl"></audio></div>';
+            h+='</div></div>';
+        }
+
+        // Expandable: Documents
+        if(sc.documents && sc.documents.length>5){
+            h+='<div class="expand-section">';
+            h+='<div class="expand-header" data-target="'+sid+'docs">&#x1F4C4; Documents Required <span class="expand-arrow" id="'+sid+'docsArr">&#x25BC;</span></div>';
+            h+='<div class="expand-body" id="'+sid+'docs">'+esc(sc.documents)+'';
+            h+='<div class="action-btns">';
+            h+='<button class="btn-sm btn-translate" data-text="'+sid+'docs" data-lang="'+outLang+'" data-src="english">&#x1F310; Translate</button>';
+            h+='<button class="btn-sm btn-listen" data-text="'+sid+'docs" data-lang="'+outLang+'" data-src="english">&#x1F50A; Listen</button>';
+            h+='</div>';
+            h+='<div class="translated-text" id="'+sid+'docsT"></div>';
+            h+='<div class="inline-audio" id="'+sid+'docsA"><audio controls style="width:100%;height:36px;border-radius:8px" id="'+sid+'docsAEl"></audio></div>';
+            h+='</div></div>';
+        }
+
+        h+='</div>'; // close scheme-card
+    }
+
+    // Regional summary
+    if(isRegional && data.summary_regional){
+        h+='<div class="summary-card">';
+        h+='<strong>&#x1F310; Summary in '+esc(outLang)+'</strong>';
+        h+='<div class="regional-text" style="margin-top:8px">'+esc(data.summary_regional)+'</div>';
+        h+='</div>';
+    }
+
+    sec.innerHTML=h;
+
+    // ── Auto-translate scheme names + descriptions if regional ──
+    if(isRegional){
+        for(var i=0;i<schemes.length;i++){
+            (function(idx){
+                var sc=schemes[idx];
+                var sid="s"+idx;
+                // Translate name
+                requestTranslation(sc.name, outLang, "english", function(txt){
+                    var el=document.getElementById(sid+"nameR");
+                    if(el && txt){el.textContent=txt;el.classList.add("show");el.style.display="block";}
+                });
+                // Translate description
+                if(sc.description && sc.description.length>10){
+                    requestTranslation(sc.description, outLang, "english", function(txt){
+                        var el=document.getElementById(sid+"descR");
+                        if(el && txt){el.textContent=txt;el.classList.add("show");el.style.display="block";}
+                    });
+                }
+            })(i);
+        }
+    }
+
+    // ── Attach event listeners via delegation ──
+    sec.addEventListener("click", function(e){
+        var target=e.target;
+
+        // Expand/collapse headers
+        if(target.classList.contains("expand-header") || target.parentElement.classList.contains("expand-header")){
+            var header = target.classList.contains("expand-header") ? target : target.parentElement;
+            var bodyId = header.getAttribute("data-target");
+            var body = document.getElementById(bodyId);
+            var arrow = document.getElementById(bodyId+"Arr");
+            if(body){
+                body.classList.toggle("open");
+                if(arrow)arrow.classList.toggle("open");
+            }
+            return;
+        }
+
+        // Translate buttons
+        if(target.classList.contains("btn-translate")){
+            var textId = target.getAttribute("data-text");
+            var lang = target.getAttribute("data-lang");
+            var src = target.getAttribute("data-src") || "english";
+            var textEl = document.getElementById(textId);
+            var transEl = document.getElementById(textId+"T");
+            if(!textEl || !transEl)return;
+
+            // If already translated, toggle visibility
+            if(transEl.textContent.length > 0){
+                transEl.classList.toggle("show");
+                return;
+            }
+
+            target.disabled=true;
+            target.textContent="Translating...";
+            // Get raw text (without button text etc) — use first text content
+            var rawText="";
+            for(var c=0;c<textEl.childNodes.length;c++){
+                if(textEl.childNodes[c].nodeType===3){rawText+=textEl.childNodes[c].textContent;}
+            }
+            rawText=rawText.trim();
+            if(!rawText)rawText=textEl.innerText.split("Translate")[0].split("Listen")[0].trim();
+
+            requestTranslation(rawText, lang, src, function(txt){
+                target.disabled=false;
+                target.innerHTML="&#x1F310; Translate";
+                if(txt){transEl.textContent=txt;transEl.classList.add("show");}
+                else{showToast("Translation failed");}
+            });
+            return;
+        }
+
+        // Section Listen buttons (inside expandable sections)
+        if(target.classList.contains("btn-listen")){
+            var textId = target.getAttribute("data-text");
+            var lang = target.getAttribute("data-lang");
+            var src = target.getAttribute("data-src") || "english";
+            var textEl = document.getElementById(textId);
+            var audioDiv = document.getElementById(textId+"A");
+            var audioEl = document.getElementById(textId+"AEl");
+            if(!textEl || !audioDiv || !audioEl)return;
+
+            // If audio already loaded, just toggle play
+            if(audioEl.src && audioEl.src.indexOf("base64")>-1){
+                audioDiv.classList.add("show");
+                audioEl.currentTime=0;
+                audioEl.play();
+                return;
+            }
+
+            target.disabled=true;
+            target.textContent="Generating...";
+            var rawText="";
+            for(var c=0;c<textEl.childNodes.length;c++){
+                if(textEl.childNodes[c].nodeType===3){rawText+=textEl.childNodes[c].textContent;}
+            }
+            rawText=rawText.trim();
+            if(!rawText)rawText=textEl.innerText.split("Translate")[0].split("Listen")[0].trim();
+
+            // Limit text for TTS (max ~1500 chars)
+            if(rawText.length>1500)rawText=rawText.substring(0,1500);
+
+            requestTTS(rawText, lang, src, function(audio, translatedText){
+                target.disabled=false;
+                target.innerHTML="&#x1F50A; Listen";
+                if(audio){
+                    audioEl.src="data:audio/wav;base64,"+audio;
+                    audioDiv.classList.add("show");
+                    audioEl.play();
+                    // Also show translated text if we got it
+                    if(translatedText){
+                        var transEl=document.getElementById(textId+"T");
+                        if(transEl && !transEl.textContent){
+                            transEl.textContent=translatedText;
+                            transEl.classList.add("show");
+                        }
+                    }
+                }else{showToast("Voice generation failed");}
+            });
+            return;
+        }
+
+        // Scheme-level Listen button (top right on card)
+        if(target.classList.contains("scheme-listen-btn")){
+            var idx=parseInt(target.getAttribute("data-idx"));
+            var sid="s"+idx;
+            var audioDiv=document.getElementById(sid+"audio");
+            var audioEl=document.getElementById(sid+"audioEl");
+            if(!audioDiv||!audioEl)return;
+
+            // If already loaded, replay
+            if(audioEl.src && audioEl.src.indexOf("base64")>-1){
+                audioDiv.classList.add("show");
+                audioEl.currentTime=0;
+                audioEl.play();
+                return;
+            }
+
+            var sc=currentResult.schemes[idx];
+            if(!sc)return;
+            target.disabled=true;
+            target.innerHTML="&#x23F3; Loading...";
+
+            // Build a summary of the scheme for TTS
+            var summary = sc.name + ". ";
+            if(sc.description) summary += sc.description.substring(0,300) + ". ";
+            summary += "Benefit: " + formatBenefit(sc.benefit) + ". ";
+            if(sc.eligibility) summary += "Eligibility: " + sc.eligibility.substring(0,200);
+            if(summary.length>1500)summary=summary.substring(0,1500);
+
+            requestTTS(summary, outLang, "english", function(audio, translatedText){
+                target.disabled=false;
+                target.innerHTML="&#x1F50A; Listen";
+                if(audio){
+                    audioEl.src="data:audio/wav;base64,"+audio;
+                    audioDiv.classList.add("show");
+                    audioEl.play();
+                }else{showToast("Voice generation failed for this scheme");}
+            });
+            return;
+        }
+    });
+
+    // Scroll to results
+    sec.scrollIntoView({behavior:"smooth"});
+}
+
+// Make outLang accessible for listen buttons
+var outLang = "english";
+</script>
+</body>
+</html>
